@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Space Invaders</title>
+	</head>
+	<body>
+		<canvas id="c" height="400px" width="320px"></canvas>
+		<nav>
+		    <button id="left">Left</button>
+		    <button id="fire">FIRE</button>
+		    <button id="right">Right</button>
+		</nav>
+		<script>
+alert('If the alien gets stuck, or is not visible, reload the page/run again');
+//Declare variables
+let c = document.getElementById('c');
+let ctx = c.getContext('2d');
+let playerX = c.width / 2;
+let playerY = c.height - 35;
+let alienX = Math.round(Math.random() * c.width - 25);
+let alienY = Math.round(Math.random() * (c.height - 200)) + 50;
+let alienMove = 2; //Speed of alien
+let rightB = document.getElementById('right'); 
+let leftB = document.getElementById('left');
+let fireB = document.getElementById('fire');
+let rocketX = playerX;
+let rocketY = playerY;
+let alienRocketX = alienX;
+let alienRocketY = alienY;
+let alienRocketOn = false;
+let rocketOn = false;
+let alienDead = false;
+let leftOn = false; 
+let rightOn = false;
+let chance = 300; //Chance of alien firing
+
+//Add event listeners
+
+//Fire Button
+fireB.addEventListener('click', turnRocketOn);
+
+//Left Button
+leftB.addEventListener('mousedown', left);
+leftB.addEventListener('touchstart', left);
+
+leftB.addEventListener('mouseup', leftOff);
+leftB.addEventListener('touchend', leftOff);
+
+//Right Button
+rightB.addEventListener('mousedown', right);
+rightB.addEventListener('touchstart', right);
+
+rightB.addEventListener('mouseup', rightOff);
+rightB.addEventListener('touchend', rightOff);
+
+
+//Move Functions
+
+function right() {
+    rightOn = true;
+}
+
+function rightOff() {
+    rightOn = false;
+}
+
+function left() {
+    leftOn = true;
+}
+
+function leftOff() {
+    leftOn = false;
+}
+
+function drawPlayer() {
+    ctx.beginPath();
+    ctx.rect(playerX, playerY, 15, 25);
+    ctx.fillStyle = 'lightgray';
+    ctx.fill();
+    ctx.closePath();
+}
+
+function drawRocket() {
+    ctx.beginPath();
+    rocketX = playerX;
+    ctx.rect(rocketX, rocketY, 10, 5);
+    ctx.fillStyle = 'red';
+    ctx.fill();
+    ctx.closePath();
+}
+
+function turnRocketOn() {
+    rocketOn = true;
+}
+
+function updateRocket() {
+    drawRocket();
+    if (rocketY === 0) {
+        rocketOn = false;
+        rocketY = playerY;
+        return;
+    }
+    rocketY += -5;
+}
+
+function drawAlien() {
+    ctx.beginPath();
+    ctx.rect(alienX, alienY, 20, 10);
+    ctx.fillStyle = 'lightgreen';
+    ctx.fill();
+    ctx.closePath();
+}
+
+function alienFire() {
+    ctx.beginPath();
+    ctx.rect(alienRocketX, alienRocketY, 10, 5);
+    ctx.fillStyle = 'green';
+    ctx.fill();
+    ctx.closePath();
+}
+
+function alienFireC(){
+    alienFireChance = Math.round(Math.random() * chance);
+    if (alienFireChance == 1) {
+        alienRocketOn = true;
+    }
+}
+
+function update() {
+    ctx.clearRect(0, 0, c.width, c.height);
+    if (alienDead) {
+        alert('You WON!');
+        playerX = c.width / 2;
+        alienX = Math.round(Math.random() * c.width - 25);
+        alienY = Math.round(Math.random() * (c.height - 100));
+        alienDead = false;
+    }
+    
+    drawPlayer();
+    drawAlien();
+    if (rocketOn) {
+        updateRocket();
+    }
+    
+    if (rocketY >= alienY && rocketY <= alienY + 4 && (rocketX > alienX - 15 && rocketX < alienX + 15)) {
+        alienDead = true;
+    }
+    
+    if (alienX + alienMove >= c.width || alienX + alienMove <= 0) {
+        alienMove = -alienMove;
+    } else {
+        alienX += alienMove;
+    }
+    
+    if (alienRocketY >= playerY && (alienRocketX > playerX - 10 && alienRocketX < playerX + 10)) {
+        alert('You LOSE!');
+        playerX = c.width / 2;
+        alienX = Math.round(Math.random() * c.width - 25);
+        alienY = Math.round(Math.random() * (c.height - 100));
+        alienRocketY = c.height;
+    }
+     
+    alienFireC();
+    
+    if (alienRocketY >= c.height) {
+        alienRocketY = alienY;
+        alienRocketX = alienX;
+        alienRocketOn = false;
+    }
+    
+    if (alienRocketOn) {
+        alienFire();   
+        alienRocketY += 5;
+    }
+    
+    if (playerX <= 0 || playerX >= c.width) {
+        if (playerX <= 0) {
+            playerX = 5;
+        } else {
+            playerX -= 5;
+        }
+    } else {
+        if (rightOn) {
+            playerX += 2;
+        } 
+        else if (leftOn) {
+            playerX -= 2;
+        }
+    }
+}
+
+setInterval(update, 10);
+		</script>
+	</body>
+</html>
