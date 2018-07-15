@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Space Invaders</title>
-		<style>
-			#c {
+    <head>
+        <title>Space Invaders</title>
+        <style>
+#c {
     border: 1px solid white;
     background-image: url('http://gifimage.net/wp-content/uploads/2018/04/pixel-stars-gif-4.gif');
 }
@@ -19,6 +19,9 @@ button {
     border: 1px solid white;
     margin: .5em;
     font-family: monospace;
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
 }
 
 #fire {
@@ -29,23 +32,39 @@ button {
 html {
     background-color: black;
 }
-		</style>
-	</head>
-	<body>
-		<canvas id="c" height="400px" width="320px"></canvas>
-		<nav>
-		    <button id="left">Left</button>
-		    <button id="fire">FIRE</button>
-		    <button id="right">Right</button>
-		</nav>
-		<script>
-alert('If the alien gets stuck, or is not visible, reload the page/run again');
+
+#Points {
+    background-color: black;
+    color: white;
+    font-family: monospace;
+    border: 1px solid white;
+    margin-top: 1em;
+}
+
+#Points::placeholder {
+    color: white;
+    font-family: monospace;
+}
+        </style>
+    </head>
+    <body>
+        <canvas id="c" height="400px" width="320px"></canvas>
+        <nav>
+            <button id="left">Left</button>
+            <button id="fire">FIRE</button>
+            <button id="right">Right</button>
+        </nav>
+        <input id="Points" readonly placeholder="Score: 0">
+        <script>
+alert('Version 1.1 - Fixed Selection issue. Now allows firing while moving.');
+alert('Version 1.2 - Added point system and fixed missile issue');
+alert('Version 1.3 - Some bug fixes. Added point indicator');
 //Declare variables
 let c = document.getElementById('c');
 let ctx = c.getContext('2d');
 let playerX = c.width / 2;
 let playerY = c.height - 35;
-let alienX = Math.round(Math.random() * c.width - 25);
+let alienX = Math.round(Math.random() * c.width - 50);
 let alienY = Math.round(Math.random() * (c.height - 200)) + 50;
 let alienMove = 2; //Speed of alien
 let rightB = document.getElementById('right'); 
@@ -61,11 +80,15 @@ let alienDead = false;
 let leftOn = false; 
 let rightOn = false;
 let chance = 100; //Chance of alien firing
+let score = 0;
+let turn = 0;
+let scoreboard = document.getElementById('Points');
 
 //Add event listeners
 
 //Fire Button
-fireB.addEventListener('click', turnRocketOn);
+fireB.addEventListener('mousedown', turnRocketOn);
+fireB.addEventListener('touchstart', turnRocketOn);
 
 //Left Button
 leftB.addEventListener('mousedown', left);
@@ -109,8 +132,11 @@ function drawPlayer() {
 }
 
 function drawRocket() {
+    if (turn === 0) {
+        rocketX = playerX;
+        turn++;
+    }
     ctx.beginPath();
-    rocketX = playerX;
     ctx.rect(rocketX, rocketY, 10, 5);
     ctx.fillStyle = 'red';
     ctx.fill();
@@ -126,6 +152,7 @@ function updateRocket() {
     if (rocketY === 0) {
         rocketOn = false;
         rocketY = playerY;
+        turn = 0;
         return;
     }
     rocketY += -5;
@@ -157,11 +184,13 @@ function alienFireC(){
 function update() {
     ctx.clearRect(0, 0, c.width, c.height);
     if (alienDead) {
-        alert('You WON!');
+        score++;
         playerX = c.width / 2;
         alienX = Math.round(Math.random() * c.width - 25);
         alienY = Math.round(Math.random() * (c.height - 100));
         alienDead = false;
+        rocketY = 0;
+        scoreboard.value = "Points: " + score;
     }
     
     drawPlayer();
@@ -181,7 +210,9 @@ function update() {
     }
     
     if (alienRocketY >= playerY && (alienRocketX > playerX - 10 && alienRocketX < playerX + 10)) {
-        alert('You LOSE!');
+        alert("You've been killed!");
+        score = 0;
+        scoreboard.value = "Points: " + score;
         playerX = c.width / 2;
         alienX = Math.round(Math.random() * c.width - 25);
         alienY = Math.round(Math.random() * (c.height - 100));
@@ -218,6 +249,6 @@ function update() {
 }
 
 setInterval(update, 10);
-		</script>
-	</body>
+        </script>
+    </body>
 </html>
